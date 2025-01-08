@@ -73,8 +73,8 @@
   };
 
   # Pulseaudio setup
-  hardware.pulseaudio.enable = true;
-  hardware.pulseaudio.support32Bit = true;
+  hardware.pulseaudio.enable = false;
+  hardware.pulseaudio.support32Bit = false;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

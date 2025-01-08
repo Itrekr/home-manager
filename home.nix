@@ -12,7 +12,7 @@ in
 {
   home.username = "oscar";
   home.homeDirectory = "/home/oscar";
-  home.stateVersion = "24.05";
+  home.stateVersion = "24.11";
 
   imports = [
     ./firefox.nix
@@ -114,5 +114,6 @@ in
     jq
     nmap
     discord
+    gpt4all
   ];
 }
