@@ -101,6 +101,16 @@
     LC_TIME = "nl_NL.UTF-8";
   };
 
+  # NVIDIA
+  hardware.graphics.enable = true;
+  hardware.nvidia.open = false;
+  hardware.nvidia.prime = {
+      offload.enable = true;
+      offload.enableOffloadCmd = true;
+      intelBusId = "PCI:0:2:0";
+      nvidiaBusId = "PCI:1:0:0";
+  };
+
   # Enable the X server and set up i3
   services.xserver = {
     enable = true;
@@ -110,6 +120,7 @@
     autoRepeatInterval = 30;
     displayManager.lightdm.enable = true;
     windowManager.i3.enable = true;
+    videoDrivers = [ "nvidia" ];
   };
 
   # Define users
