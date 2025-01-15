@@ -108,12 +108,13 @@ in
     texlive.combined.scheme-full
     mpv
     killall
-    burpsuite
     fortune
     prismlauncher
     jq
-    nmap
     discord
     gpt4all
+    rustc
+    cargo
+    at
   ];
 }
