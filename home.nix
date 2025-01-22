@@ -112,7 +112,6 @@ in
     prismlauncher
     jq
     discord
-    gpt4all
     rustc
     cargo
     at

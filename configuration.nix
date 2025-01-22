@@ -29,7 +29,7 @@
     };
   };
   services.power-profiles-daemon.enable = false;
-  powerManagement.powertop.enable = true;
+  powerManagement.powertop.enable = false;
   services.thermald.enable = true;
 
   # DNS settings
@@ -56,6 +56,7 @@
   services.logind = {
     lidSwitch = "suspend";
     lidSwitchDocked = "ignore";
+    lidSwitchExternalPower = "ignore";
     powerKey = "poweroff";
     suspendKey = "suspend";
     hibernateKey = "hibernate";
