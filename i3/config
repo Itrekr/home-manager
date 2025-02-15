@@ -80,7 +80,7 @@ exec_always --no-startup-id bash /home/oscar/.config/polybar/launch.sh
 exec --no-startup-id export DBUS_SESSION_BUS_ADDRESS=$(dbus-launch echo $DBUS_SESSION_BUS_ADDRESS)
 
 # Automatically check display setup
-exec_always --no-startup-id autorandr -c
+# exec_always --no-startup-id autorandr -c
 
 # Disable screensaver
 exec --no-startup-id xset s off -dpms
@@ -91,11 +91,7 @@ bindsym $mod+Shift+r exec i3-msg restart
 bindsym $mod+e exec emacsclient -c
 bindsym $mod+shift+control+e exec killall emacs-29.4 && emacs-29.4 --bg-daemon
 bindsym $mod+b exec firefox -P "default" -new-window
-# bindsym $mod+shift+b exec firefox -P "Hacker" -new-window
 bindsym $mod+m exec spotify
-# bindsym $mod+shift+m exec /bin/rofi-radio
-# bindsym $mod+control+shift+m exec /bin/rofi-radio-draupnir
-#bindsym $mod+n exec journal
 bindsym $mod+n exec --no-startup-id emacsclient -c -a "" -e "(progn (org-roam-dailies-goto-today) (when (featurep 'display-line-numbers) (display-line-numbers-mode -1)) (goto-char (point-max)) (unless (or (bolp) (looking-back \\\"\\n\\n\\\" nil)) (insert \\\"\\n\\\")) (insert \\\"\\n\\\") (when (fboundp 'evil-insert-state) (evil-insert-state)))"
 bindsym $mod+shift+n exec --no-startup-id emacsclient -c -a "" /home/oscar/Mimisbrunnr/Notes/Journal/journal.org
 bindsym $mod+c exec emacsclient -c -e '(chatgpt-shell)'
@@ -104,7 +100,6 @@ bindsym $mod+shift+o exec chromium --profile-directory="ORUI" --app=http://127.0
 bindsym $mod+x exec sleep 5 && xset dpms force off
 bindsym $mod+shift+x exec bash -c '~/.config/i3/lockscreen.sh'
 bindsym $mod+control+shift+x exec shutdown now
-#bindsym $mod+s workspace 6; exec bash -c 'pgrep -x signal-desktop || signal-desktop'
 bindsym $mod+shift+s exec flameshot gui -s -c
 bindsym $mod+s exec flameshot gui
 bindsym $mod+t exec chromium --profile-directory="Profile 1" --new-window https://teams.microsoft.com
@@ -243,13 +238,13 @@ bindsym $mod+r mode "resize"
 # bar {
 #         status_command i3status
 # }
-workspace 1 output DP-1-4.2
-workspace 2 output DP-1-4.2
-workspace 3 output DP-1-4.2
-workspace 4 output DP-1-4.2
-workspace 5 output DP-1-4.2
-workspace 6 output DP-1-4.2
-workspace 7 output DP-1-4.1
-workspace 8 output DP-1-4.1
-workspace 9 output DP-1-4.1
-workspace 10 output DP-1-4.1
+workspace 1 output DP-4.2
+workspace 2 output DP-4.2
+workspace 3 output DP-4.2
+workspace 4 output DP-4.2
+workspace 5 output DP-4.2
+workspace 6 output DP-4.2
+workspace 7 output DP-4.1
+workspace 8 output DP-4.1
+workspace 9 output DP-4.1
+workspace 10 output DP-4.1

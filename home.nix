@@ -17,6 +17,7 @@ in
   imports = [
     ./firefox.nix
     ./readwise.nix
+    ./distractions.nix
   ];
 
   # Allow unfree packages
@@ -115,5 +116,6 @@ in
     rustc
     cargo
     at
+    rpi-imager
   ];
 }

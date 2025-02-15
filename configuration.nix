@@ -9,12 +9,13 @@
   # System settings
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelParams = [
+    "nvidia-drm.modeset=1"
+  ];
+
 
   networking.hostName = "sleipnir";
   networking.networkmanager.enable = true; # Enable NetworkManager for easy network management
-  # networking.firewall.allowedUDPPorts = [ 8096 ];
-  # networking.firewall.allowedTCPPorts = [ 8096 ];
-  networking.firewall.enable = false;
 
   # Laptop battery setup
   services.system76-scheduler.settings.cfsProfiles.enable = true;
@@ -31,6 +32,13 @@
   services.power-profiles-daemon.enable = false;
   powerManagement.powertop.enable = false;
   services.thermald.enable = true;
+
+  # Steam
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+  };
 
   # DNS settings
   networking.nameservers = [
@@ -106,11 +114,17 @@
   hardware.graphics.enable = true;
   hardware.nvidia.open = false;
   hardware.nvidia.prime = {
-      offload.enable = true;
-      offload.enableOffloadCmd = true;
+      offload.enable = false;
+      offload.enableOffloadCmd = false;
       intelBusId = "PCI:0:2:0";
       nvidiaBusId = "PCI:1:0:0";
   };
+  hardware.nvidia = {
+    modesetting.enable = true;
+    powerManagement.enable = true;
+  };
+
+  hardware.nvidia-container-toolkit.enable = true;
 
   # Enable the X server and set up i3
   services.xserver = {
@@ -141,6 +155,10 @@
 
   # Enable autologin for convenience (if desired)
   services.displayManager.autoLogin.user = "oscar";
+  # services.displayManager.autoLogin.enable = false;
+  services.xserver.displayManager.sessionCommands = ''
+    autorandr -c
+  '';
 
   # Gnome keyring onzin
   services.gnome.gnome-keyring.enable = true;
