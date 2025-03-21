@@ -28,7 +28,7 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id nm-applet
 
 # Set wallpaper
-exec_always --no-startup-id feh --bg-scale ~/.config/i3/wall.png
+exec_always --no-startup-id feh --bg-scale ~/Media/Wallpapers/animalart4.png --bg-scale ~/Media/Wallpapers/animalart3.png
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status

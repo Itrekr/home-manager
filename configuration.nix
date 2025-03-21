@@ -118,13 +118,23 @@
       offload.enableOffloadCmd = false;
       intelBusId = "PCI:0:2:0";
       nvidiaBusId = "PCI:1:0:0";
+      sync.enable = true;
   };
+
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.enable = true;
   };
 
   hardware.nvidia-container-toolkit.enable = true;
+
+  # Printers
+  services.printing.enable = true;
+  services.avahi = {
+  enable = true;
+  nssmdns4 = true;
+  openFirewall = true;
+  };
 
   # Enable the X server and set up i3
   services.xserver = {
@@ -154,7 +164,7 @@
   ];
 
   # Enable autologin for convenience (if desired)
-  services.displayManager.autoLogin.user = "oscar";
+  services.displayManager.autoLogin.user = "/oscar";
   # services.displayManager.autoLogin.enable = false;
   services.xserver.displayManager.sessionCommands = ''
     autorandr -c

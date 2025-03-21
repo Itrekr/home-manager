@@ -7,7 +7,8 @@ screenshot_path="/tmp/screenshot.png"
 blurred_screenshot_path="/tmp/blurred_screenshot.png"
 
 # Path to the overlay image
-overlay_path="$HOME/.config/i3/redacted.png"
+#overlay_path="$HOME/.config/i3/redacted.png"
+overlay_path="$HOME/.config/i3/alex.png"
 
 # Path to the final output file
 output_path="/tmp/screensaver.png"
