@@ -17,7 +17,7 @@ in
   imports = [
     ./firefox.nix
     ./readwise.nix
-  #  ./distractions.nix
+    ./distractions.nix
   ];
 
   # Allow unfree packages
@@ -41,6 +41,7 @@ in
     ".config/polybar/config.ini".source = ./polybar/config.ini;
     ".config/polybar/deadcon.sh".source = ./polybar/deadcon.sh;
     ".config/polybar/launch.sh".source = ./polybar/launch.sh;
+    ".config/polybar/daily_wordcount.sh".source = ./polybar/daily_wordcount.sh;
     ".config/polybar/promodoro_duration.sh".source = ./polybar/promodoro_duration.sh;
     ".config/polybar/spotify_status.py".source = ./polybar/spotify_status.py;
     ".config/polybar/tun_script.sh".source = ./polybar/tun_script.sh;
@@ -70,7 +71,7 @@ in
     ranger
     rofi
     nerdfonts
-    emacs29
+    emacs30
     git
     ripgrep
     fd
@@ -119,5 +120,7 @@ in
     at
     rpi-imager
     sshfs
+    android-tools
+    gimp
   ];
 }

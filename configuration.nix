@@ -14,6 +14,10 @@
   ];
 
 
+  services.udev.packages = [
+   pkgs.android-udev-rules
+  ];
+
   networking.hostName = "sleipnir";
   networking.networkmanager.enable = true; # Enable NetworkManager for easy network management
 

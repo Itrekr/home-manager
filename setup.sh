@@ -44,6 +44,7 @@ ln -sf "${SECRETS_DIR}/oscar_lab" "${SSH_DIR}/oscar_lab"
 ln -sf "${SECRETS_DIR}/oscar_lab.pub" "${SSH_DIR}/oscar_lab.pub"
 ln -sf "${SECRETS_DIR}/root_usage" "${SSH_DIR}/root_usage"
 ln -sf "${SECRETS_DIR}/openai_api_key" "$HOME/.openai_api_key"
+ln -sf "${SECRETS_DIR}/.gnupg" "$HOME/.gnupg"
 
 echo "Symlinks for secrets have been set up."
 

@@ -28,7 +28,7 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id nm-applet
 
 # Set wallpaper
-exec_always --no-startup-id feh --bg-scale ~/Media/Wallpapers/animalart4.png --bg-scale ~/Media/Wallpapers/animalart3.png
+exec_always --no-startup-id feh --bg-scale ~/Mimisbrunnr/Pictures/animalart4.png --bg-scale ~/Mimisbrunnr/Pictures/animalart3.png
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
@@ -52,7 +52,7 @@ exec --no-startup-id python3 ~/.config/i3/alternating_layouts.py
 #exec --no-startup-id dockcheck
 
 # Emacs daemon
-exec --no-startup-id emacs-29.4 --bg-daemon
+exec --no-startup-id emacs-30.1 --bg-daemon
 
 # Nextcloud
 exec --no-startup-id nextcloud
@@ -89,7 +89,7 @@ exec --no-startup-id xset s off -dpms
 bindsym $mod+Shift+c exec i3-msg reload
 bindsym $mod+Shift+r exec i3-msg restart
 bindsym $mod+e exec emacsclient -c
-bindsym $mod+shift+control+e exec killall emacs-29.4 && emacs-29.4 --bg-daemon
+bindsym $mod+shift+control+e exec killall emacs-30.1 && emacs-30.1 --bg-daemon
 bindsym $mod+b exec firefox -P "default" -new-window
 bindsym $mod+m exec spotify
 bindsym $mod+n exec --no-startup-id emacsclient -c -a "" -e "(progn (org-roam-dailies-goto-today) (when (featurep 'display-line-numbers) (display-line-numbers-mode -1)) (goto-char (point-max)) (unless (or (bolp) (looking-back \\\"\\n\\n\\\" nil)) (insert \\\"\\n\\\")) (insert \\\"\\n\\\") (when (fboundp 'evil-insert-state) (evil-insert-state)))"
@@ -238,13 +238,13 @@ bindsym $mod+r mode "resize"
 # bar {
 #         status_command i3status
 # }
-workspace 1 output DP-4.2
-workspace 2 output DP-4.2
-workspace 3 output DP-4.2
-workspace 4 output DP-4.2
-workspace 5 output DP-4.2
-workspace 6 output DP-4.2
-workspace 7 output DP-4.1
-workspace 8 output DP-4.1
-workspace 9 output DP-4.1
-workspace 10 output DP-4.1
+workspace 1 output DP-1.2
+workspace 2 output DP-1.2
+workspace 3 output DP-1.2
+workspace 4 output DP-1.2
+workspace 5 output DP-1.2
+workspace 6 output DP-1.2
+workspace 7 output DP-1.1
+workspace 8 output DP-1.1
+workspace 9 output DP-1.1
+workspace 10 output DP-1.1
