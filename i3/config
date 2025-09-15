@@ -52,7 +52,7 @@ exec --no-startup-id python3 ~/.config/i3/alternating_layouts.py
 #exec --no-startup-id dockcheck
 
 # Emacs daemon
-exec --no-startup-id emacs-30.1 --bg-daemon
+exec --no-startup-id emacs-30.2 --bg-daemon
 
 # Nextcloud
 exec --no-startup-id nextcloud
@@ -89,7 +89,7 @@ exec --no-startup-id xset s off -dpms
 bindsym $mod+Shift+c exec i3-msg reload
 bindsym $mod+Shift+r exec i3-msg restart
 bindsym $mod+e exec emacsclient -c
-bindsym $mod+shift+control+e exec killall emacs-30.1 && emacs-30.1 --bg-daemon
+bindsym $mod+shift+control+e exec killall emacs-30.2 && emacs-30.2 --bg-daemon
 bindsym $mod+b exec firefox -P "default" -new-window
 bindsym $mod+m exec spotify
 bindsym $mod+n exec --no-startup-id emacsclient -c -a "" -e "(progn (org-roam-dailies-goto-today) (when (featurep 'display-line-numbers) (display-line-numbers-mode -1)) (goto-char (point-max)) (unless (or (bolp) (looking-back \\\"\\n\\n\\\" nil)) (insert \\\"\\n\\\")) (insert \\\"\\n\\\") (when (fboundp 'evil-insert-state) (evil-insert-state)))"
@@ -98,7 +98,8 @@ bindsym $mod+c exec emacsclient -c -e '(chatgpt-shell)'
 bindsym $mod+o exec alacritty -e ranger
 bindsym $mod+shift+o exec chromium --profile-directory="ORUI" --app=http://127.0.0.1:35901
 bindsym $mod+x exec sleep 5 && xset dpms force off
-bindsym $mod+shift+x exec bash -c '~/.config/i3/lockscreen.sh'
+#bindsym $mod+shift+x exec bash -c '~/.config/i3/lockscreen.sh'
+bindsym $mod+Shift+x exec --no-startup-id bash -lc '"/home/oscar/Mimisbrunnr/Documents/mugbar/traplock.sh" 0 |& tee -a /tmp/traplock.log'
 bindsym $mod+control+shift+x exec shutdown now
 bindsym $mod+shift+s exec flameshot gui -s -c
 bindsym $mod+s exec flameshot gui

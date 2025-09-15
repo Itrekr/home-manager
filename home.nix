@@ -1,14 +1,15 @@
 { config, pkgs, ... }:
 
 let
-  python_env = pkgs.python3.withPackages (ps: with ps; [
-    pip
-    numpy
-    requests
-    i3ipc
+  py = pkgs.python312.withPackages (ps: [
+    ps.numpy
+    ps.opencv4
+    ps.pillow
+    ps.requests
+    ps.i3ipc
+    ps.pip
   ]);
 in
-
 {
   home.username = "oscar";
   home.homeDirectory = "/home/oscar";
@@ -20,10 +21,7 @@ in
     ./distractions.nix
   ];
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
-  # Configuration files and locations
+  # Your dotfiles
   home.file = {
     ".config/alacritty/alacritty.toml".source = ./alacritty/alacritty.toml;
     ".config/alacritty/alacritty.yml".source = ./alacritty/alacritty.yml;
@@ -55,27 +53,29 @@ in
     ".config/rofi/default.rasi".source = ./rofi/default.rasi;
   };
 
-  home.sessionVariables = {
-    PYTHONPATH = "${python_env}/lib/python3.10/site-packages";
-    OPENAI_API_KEY = "$(cat ~/.openai_api_key)";
-  };
+  # No PYTHONPATH override necessary; Nix wires it up.
+  # (Leaving this empty avoids version mismatches)
+  home.sessionVariables = { };
 
-  # Specify additional packages to be installed
+  # Packages
   home.packages = with pkgs; [
-    python_env
+    py
     home-manager
     alacritty
     i3
+    i3lock
+    zip
     dunst
     polybarFull
     ranger
     rofi
-    nerdfonts
+    nerd-fonts.roboto-mono
+    nerd-fonts.symbols-only
     emacs30
     git
     ripgrep
     fd
-    okular
+    kdePackages.okular
     clang
     gnupg
     spotify
@@ -122,5 +122,13 @@ in
     sshfs
     android-tools
     gimp
+    virtualbox
+    ncspot
+    inetutils
+    cool-retro-term
+    poppler-utils
+    qpdf
+    unzip
+    xprintidle
   ];
 }

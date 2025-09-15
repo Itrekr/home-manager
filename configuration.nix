@@ -21,6 +21,13 @@
   networking.hostName = "sleipnir";
   networking.networkmanager.enable = true; # Enable NetworkManager for easy network management
 
+
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 4242 2323 3000 ];
+    allowedUDPPorts = [ 4242 2323 3000 ];
+  };
+
   # Laptop battery setup
   services.system76-scheduler.settings.cfsProfiles.enable = true;
   services.tlp = {
@@ -44,22 +51,22 @@
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
   };
 
-  # DNS settings
-  networking.nameservers = [
-    "9.9.9.9#dns.quad9.net"
-    "149.112.112.112#dns.quad9.net"
-  ];
+#  # DNS settings
+#  networking.nameservers = [
+#    "9.9.9.9#dns.quad9.net"
+#    "149.112.112.112#dns.quad9.net"
+#  ];
 
-  services.resolved = {
-    enable = true;
-    dnssec = "true";
-    domains = [ "~." ];
-    fallbackDns = [
-      "9.9.9.9#dns.quad9.net"
-      "149.112.112.112#dns.quad9.net"
-    ];
-    dnsovertls = "true";
-  };
+#  services.resolved = {
+#    enable = true;
+#    dnssec = "true";
+#    domains = [ "~." ];
+#    fallbackDns = [
+#      "9.9.9.9#dns.quad9.net"
+#      "149.112.112.112#dns.quad9.net"
+#    ];
+#    dnsovertls = "true";
+#  };
 
   # VPN settings
   services.mullvad-vpn.enable = true;
@@ -79,18 +86,35 @@
   hardware.bluetooth.powerOnBoot = true;
   services.blueman.enable = true;
 
-  # VMware
+  # Docker
   virtualisation = {
-  vmware.host.enable = true;
   docker.enable = true;
   };
 
+  services.ollama = {
+    enable = true;
+    loadModels = [ "mistral-nemo:12b" ];
+    acceleration = "cuda";
+  };
+
+  # VMware
+  virtualisation.vmware.host = {
+    enable = true;
+    package = pkgs.vmware-workstation.overrideAttrs (_final: _prev: {
+      # Your downloaded bundle; Nix will copy it into the store.
+      src = /home/oscar/Mimisbrunnr/Documents/vmware.bundle;
+    });
+  };
+
   # Pulseaudio setup
-  hardware.pulseaudio.enable = false;
-  hardware.pulseaudio.support32Bit = false;
+  services.pulseaudio.enable = false;
+  services.pulseaudio.support32Bit = false;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+
+  # ADB
+  programs.adb.enable = true;
 
   # Flatpak support
   xdg.portal = {
@@ -155,17 +179,25 @@
   # Define users
   users.users.oscar = {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" "audio" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "audio" "docker" "adbusers" "kvm"];
   };
+
 
   # System packages
   environment.systemPackages = with pkgs; [
-    vim
-    git
-    home-manager
-    intel-gpu-tools
-    powertop
-  ];
+  vim
+  git
+  home-manager
+  intel-gpu-tools
+  (pkgs.ollama.override {acceleration = "cuda";})
+  powertop
+];
+
+  home-manager = {
+   useGlobalPkgs = true;
+   useUserPackages = true;
+   users.oscar = import /home/oscar/.config/home-manager/home.nix;
+  };
 
   # Enable autologin for convenience (if desired)
   services.displayManager.autoLogin.user = "/oscar";
