@@ -8,18 +8,23 @@ SSH_DIR="$HOME/.ssh"
 echo "=== 1) Link NixOS configuration to this repo ==="
 sudo ln -sf "$HOME/.config/home-manager/configuration.nix" /etc/nixos/configuration.nix
 
-echo "=== 2) (Optional) fonts passthrough symlink ==="
+echo "=== 2) Ensure hardware-configuration.nix exists ==="
+if [ ! -f /etc/nixos/hardware-configuration.nix ]; then
+  echo "Generating /etc/nixos/hardware-configuration.nix ..."
+  sudo nixos-generate-config --root /
+fi
+
+echo "=== 3) (Optional) fonts passthrough symlink ==="
 mkdir -p "$HOME/.local/share"
 ln -sf "$HOME/.config/home-manager/fonts" "$HOME/.local/share/fonts" || true
 
-echo "=== 3) Add Home-Manager 24.05 channel for ROOT and update ==="
-# Nodig voor <home-manager/nixos> tijdens nixos-rebuild
+echo "=== 4) Add Home-Manager 24.05 channel for ROOT and update ==="
 if ! sudo nix-channel --list | grep -q "^home-manager "; then
   sudo nix-channel --add "$HM_CHANNEL_URL" home-manager
 fi
 sudo nix-channel --update
 
-echo "=== 4) Symlink secrets from Nextcloud (if present) ==="
+echo "=== 5) Symlink secrets from Nextcloud (if present) ==="
 mkdir -p "$SSH_DIR"
 chmod 700 "$SSH_DIR" || true
 
@@ -30,17 +35,16 @@ done
 [ -e "${SECRETS_DIR}/.gnupg" ] && ln -sf "${SECRETS_DIR}/.gnupg" "$HOME/.gnupg" || true
 [ -e "${SECRETS_DIR}/doom.private.env" ] && ln -sf "${SECRETS_DIR}/doom.private.env" "$HOME/.config/doom.private.env" || true
 
-echo "=== 5) Rebuild NixOS (HM module applies your home) ==="
+echo "=== 6) Rebuild NixOS (HM module will apply your home) ==="
 sudo nixos-rebuild switch
 
-echo "=== 6) Enable user services ==="
+echo "=== 7) Enable user services ==="
 systemctl --user daemon-reload || true
 systemctl --user enable --now emacs.service || true
 systemctl --user enable --now nextcloud-mimi-sync.timer nextcloud-mimi-sync.service || true
 
-# Doom bootstrap alleen als ~/.config/doom nog niet bestaat
 if [ ! -d "$HOME/.config/doom" ]; then
-  echo "Enabling doom-bootstrap.service (will clone your private repo)..."
+  echo "Enabling doom-bootstrap.service (will clone your private repo)…"
   systemctl --user enable --now doom-bootstrap.service || true
 else
   echo "~/.config/doom exists — not enabling doom-bootstrap."

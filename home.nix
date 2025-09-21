@@ -1,25 +1,23 @@
 { config, pkgs, ... }:
 
 let
-  emacsPkg = pkgs.emacs29-nox;  # TTY Emacs 29 uit 24.05
+  emacsPkg = pkgs.emacs29-nox;  # TTY build on 24.05
 in
 {
   home.username = "oscar";
   home.homeDirectory = "/home/oscar";
   programs.home-manager.enable = true;
 
-  # Pakketten (lean)
   home.packages = with pkgs; [
     emacsPkg
     git ripgrep fd tree gnupg
     aspell aspellDicts.en aspellDicts.nl
     nextcloud-client rclone
     openssh
-    # Fonts voor later (TTY gebruikt console-font); Poppins weggelaten i.v.m. compat
     (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" "Iosevka" ]; })
   ];
 
-  # Eigen Emacs-daemon als user service (robuuster dan HM services.emacs op oudere HM)
+  # Emacs daemon as a user unit (robust on 24.05)
   systemd.user.services.emacs = {
     Unit = { Description = "Emacs Daemon"; };
     Service = {
@@ -52,7 +50,6 @@ in
 
   programs.tmux.enable = true;
 
-  # SSH client config (known_hosts wordt in bootstrap gezet)
   home.file.".ssh/config".text = ''
     Host github.com
       AddKeysToAgent yes
@@ -60,7 +57,6 @@ in
       IdentitiesOnly yes
   '';
 
-  # Nextcloud/Mimisbrunnr env (vul zelf)
   home.file.".config/nextcloud-sync.env".text = ''
     NEXTCLOUD_URL="https://cloud.example.org/remote.php/dav/files/YOURUSER"
     NEXTCLOUD_USER="YOURUSER"
@@ -68,7 +64,6 @@ in
     LOCAL_DIR="$HOME/Mimisbrunnr"
   '';
 
-  # Scripts vanuit repo
   home.file.".config/home-manager/scripts/doom_bootstrap.sh" = {
     source = ./scripts/doom_bootstrap.sh;
     executable = true;
@@ -78,14 +73,12 @@ in
     executable = true;
   };
 
-  # Optioneel: token/URL fallback voor privé repo
   home.file.".config/doom.private.env".text = ''
     # DOOM_GIT_TOKEN="ghp_..."
     # DOOM_GIT_URL_SSH="git@github.com:Itrekr/doom.git"
     # DOOM_GIT_URL_HTTPS="https://github.com/Itrekr/doom.git"
   '';
 
-  # Nextcloud sync service + timer
   systemd.user.services."nextcloud-mimi-sync" = {
     Unit = { Description = "Nextcloud sync for Mimisbrunnr"; };
     Service = {
@@ -95,6 +88,7 @@ in
     };
     Install = { WantedBy = [ "default.target" ]; };
   };
+
   systemd.user.timers."nextcloud-mimi-sync" = {
     Unit = { Description = "Periodic Nextcloud sync"; };
     Timer = {
@@ -105,7 +99,6 @@ in
     Install = { WantedBy = [ "timers.target" ]; };
   };
 
-  # Doom bootstrap (draait 1x na login)
   systemd.user.services."doom-bootstrap" = {
     Unit = {
       Description = "Bootstrap Doom (core + private config)";
