@@ -1,54 +1,61 @@
-# Exit the script if any command fails
+#!/usr/bin/env bash
 set -e
 
-# Step 1: Link Home Manager configuration to NixOS configuration
-echo "Linking Home Manager configuration..."
-sudo ln -sf ~/.config/home-manager/configuration.nix /etc/nixos/configuration.nix
-
-# Step 2: Set up fonts directory
-echo "Setting up fonts directory..."
-mkdir -p ~/.local/share
-ln -sf ~/.config/home-manager/fonts ~/.local/share/fonts
-
-# Step 3: Add Home Manager channel and update
-echo "Adding and updating Home Manager channel..."
-sudo nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-sudo nix-channel --update
-
-# Step 4: Install Home Manager
-echo "Installing Home Manager..."
-sudo nix-shell '<home-manager>' -A install
-
-# Step 5: Run home-manager switch
-echo "Switching Home Manager configuration..."
-home-manager switch
-
-# Step 6: Create symlinks for secrets in Nextcloud folder
-echo "Setting up symlinks for secrets..."
-
-SECRETS_DIR="/home/oscar/Mimisbrunnr/.secrets"
+HM_CHANNEL_URL="https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz"
+SECRETS_DIR="$HOME/Mimisbrunnr/.secrets"
 SSH_DIR="$HOME/.ssh"
 
-# Ensure the .ssh directory exists
+echo "=== Step 1: Link Home Manager configuration to NixOS configuration ==="
+sudo ln -sf ~/.config/home-manager/configuration.nix /etc/nixos/configuration.nix
+
+echo "=== Step 2: Set up fonts directory (optional passthrough) ==="
+mkdir -p ~/.local/share
+ln -sf ~/.config/home-manager/fonts ~/.local/share/fonts || true
+
+echo "=== Step 3: Add Home Manager channel and update ==="
+if ! nix-channel --list | grep -q "^home-manager "; then
+  sudo nix-channel --add "$HM_CHANNEL_URL" home-manager
+fi
+sudo nix-channel --update
+
+echo "=== Step 4: Install Home Manager if missing ==="
+if ! command -v home-manager >/dev/null 2>&1; then
+  sudo nix-shell '<home-manager>' -A install
+fi
+
+echo "=== Step 5: Switch Home Manager configuration ==="
+home-manager switch -f ~/.config/home-manager/home.nix
+
+echo "=== Step 6: Symlink secrets from Nextcloud (if present) ==="
 mkdir -p "$SSH_DIR"
+chmod 700 "$SSH_DIR" || true
 
-# Create symlinks for each secret file if it exists
-ln -sf "${SECRETS_DIR}/id_ed25519" "${SSH_DIR}/id_ed25519"
-ln -sf "${SECRETS_DIR}/id_ed25519.pub" "${SSH_DIR}/id_ed25519.pub"
-ln -sf "${SECRETS_DIR}/id_rsa" "${SSH_DIR}/id_rsa"
-ln -sf "${SECRETS_DIR}/id_rsa.pub" "${SSH_DIR}/id_rsa.pub"
-ln -sf "${SECRETS_DIR}/known_hosts.old" "${SSH_DIR}/known_hosts.old"
-ln -sf "${SECRETS_DIR}/novi_key" "${SSH_DIR}/novi_key"
-ln -sf "${SECRETS_DIR}/novi_key.pub" "${SSH_DIR}/novi_key.pub"
-ln -sf "${SECRETS_DIR}/oscar_lab" "${SSH_DIR}/oscar_lab"
-ln -sf "${SECRETS_DIR}/oscar_lab.pub" "${SSH_DIR}/oscar_lab.pub"
-ln -sf "${SECRETS_DIR}/root_usage" "${SSH_DIR}/root_usage"
-ln -sf "${SECRETS_DIR}/openai_api_key" "$HOME/.openai_api_key"
-ln -sf "${SECRETS_DIR}/.gnupg" "$HOME/.gnupg"
+# Standaard SSH keys (als ze bestaan in Nextcloud)
+for f in id_ed25519 id_ed25519.pub id_rsa id_rsa.pub known_hosts.old novi_key novi_key.pub oscar_lab oscar_lab.pub root_usage; do
+  [ -f "${SECRETS_DIR}/${f}" ] && ln -sf "${SECRETS_DIR}/${f}" "${SSH_DIR}/${f}" || true
+done
 
-echo "Symlinks for secrets have been set up."
+# API keys & GPG
+[ -f "${SECRETS_DIR}/openai_api_key" ] && ln -sf "${SECRETS_DIR}/openai_api_key" "$HOME/.openai_api_key" || true
+[ -d "${SECRETS_DIR}/.gnupg" ] && ln -sf "${SECRETS_DIR}/.gnupg" "$HOME/.gnupg" || true
 
-# Step 7: Rebuild NixOS and reboot
-echo "Rebuilding NixOS and rebooting..."
+# Optioneel: doom.private.env token/URL fallback
+[ -f "${SECRETS_DIR}/doom.private.env" ] && ln -sf "${SECRETS_DIR}/doom.private.env" "$HOME/.config/doom.private.env" || true
+
+echo "Secrets symlinked."
+
+echo "=== Step 7: Enable user services (conditional doom-bootstrap) ==="
+systemctl --user daemon-reload || true
+systemctl --user enable --now nextcloud-mimi-sync.timer nextcloud-mimi-sync.service || true
+
+if [ ! -d "$HOME/.config/doom" ]; then
+  echo "Enabling doom-bootstrap.service (private repo will be cloned)..."
+  systemctl --user enable --now doom-bootstrap.service || true
+else
+  echo "~/.config/doom bestaat al — doom-bootstrap wordt niet geactiveerd."
+  systemctl --user disable --now doom-bootstrap.service 2>/dev/null || true
+fi
+
+echo "=== Step 8: Rebuild NixOS and reboot ==="
 sudo nixos-rebuild switch
 sudo reboot

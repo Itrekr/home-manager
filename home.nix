@@ -1,135 +1,121 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
-  py = pkgs.python312.withPackages (ps: [
-    ps.numpy
-    ps.opencv4
-    ps.pillow
-    ps.requests
-    ps.i3ipc
-    ps.pip
-  ]);
+  emacsPkg = pkgs.emacs29-nox;  # TTY build; Doom core ( ~/.config/emacs ) + jouw config ( ~/.config/doom )
 in
 {
   home.username = "oscar";
   home.homeDirectory = "/home/oscar";
-  home.stateVersion = "24.11";
+  programs.home-manager.enable = true;
 
-  imports = [
-    ./firefox.nix
-    ./readwise.nix
-    ./distractions.nix
+  # Pakketten: lean
+  home.packages = with pkgs; [
+    emacsPkg
+    git ripgrep fd tree gnupg
+    aspell aspellDicts.en aspellDicts.nl
+    nextcloud-client rclone
+    openssh
+    # GUI-fonts voor later; TTY gebruikt console-font
+    (pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" "Iosevka" ]; })
+    poppins
   ];
 
-  # Your dotfiles
-  home.file = {
-    ".config/alacritty/alacritty.toml".source = ./alacritty/alacritty.toml;
-    ".config/alacritty/alacritty.yml".source = ./alacritty/alacritty.yml;
-    ".bashrc".source = ./.bashrc;
-    ".inputrc".source = ./.inputrc;
-    ".config/dunst/dunstrc".source = ./dunst/dunstrc;
-    ".config/i3/config".source = ./i3/config;
-    ".config/i3/lockscreen.sh".source = ./i3/lockscreen.sh;
-    ".config/i3/monitors.sh".source = ./i3/monitors.sh;
-    ".config/i3/burpcheck.sh".source = ./i3/burpcheck.sh;
-    ".config/i3/redacted.png".source = ./i3/redacted.png;
-    ".config/i3/alex.png".source = ./i3/alex.png;
-    ".config/i3/alternating_layouts.py".source = ./i3/alternating_layouts.py;
-    ".config/i3/wall.png".source = ./i3/wall.png;
-    ".config/polybar/config.ini".source = ./polybar/config.ini;
-    ".config/polybar/deadcon.sh".source = ./polybar/deadcon.sh;
-    ".config/polybar/launch.sh".source = ./polybar/launch.sh;
-    ".config/polybar/daily_wordcount.sh".source = ./polybar/daily_wordcount.sh;
-    ".config/polybar/promodoro_duration.sh".source = ./polybar/promodoro_duration.sh;
-    ".config/polybar/spotify_status.py".source = ./polybar/spotify_status.py;
-    ".config/polybar/tun_script.sh".source = ./polybar/tun_script.sh;
-    ".config/polybar/countdown.sh".source = ./polybar/countdown.sh;
-    ".config/ranger/commands_full.py".source = ./ranger/commands_full.py;
-    ".config/ranger/commands.py".source = ./ranger/commands.py;
-    ".config/ranger/rc.conf".source = ./ranger/rc.conf;
-    ".config/ranger/rifle.conf".source = ./ranger/rifle.conf;
-    ".config/ranger/scope.sh".source = ./ranger/scope.sh;
-    ".config/rofi/config.rasi".source = ./rofi/config.rasi;
-    ".config/rofi/default.rasi".source = ./rofi/default.rasi;
+  # Emacs daemon (laadt jouw Doom setup automatisch)
+  services.emacs = {
+    enable = true;
+    package = emacsPkg;
+    startWithUserSession = "default";
   };
 
-  # No PYTHONPATH override necessary; Nix wires it up.
-  # (Leaving this empty avoids version mismatches)
-  home.sessionVariables = { };
+  # Shell basics
+  programs.bash = {
+    enable = true;
+    shellAliases = {
+      e = "emacsclient -nw -a emacs";
+      sync-mimi = "~/.config/home-manager/scripts/nextcloud_mimi_sync.sh";
+    };
+  };
 
-  # Packages
-  home.packages = with pkgs; [
-    py
-    home-manager
-    alacritty
-    i3
-    i3lock
-    zip
-    dunst
-    polybarFull
-    ranger
-    rofi
-    nerd-fonts.roboto-mono
-    nerd-fonts.symbols-only
-    emacs30
-    git
-    ripgrep
-    fd
-    kdePackages.okular
-    clang
-    gnupg
-    spotify
-    hunspell
-    hunspellDicts.nl_NL
-    hunspellDicts.en_US
-    flameshot
-    direnv
-    nix-direnv
-    pulseaudio
-    pavucontrol
-    nextcloud-client
-    emacs-all-the-icons-fonts
-    fzf
-    termdown
-    arandr
-    networkmanager
-    libreoffice
-    noto-fonts
-    chromium
-    xclip
-    feh
-    imagemagick
-    scrot
-    signal-desktop
-    networkmanagerapplet
-    zotero
-    autorandr
-    remmina
-    brightnessctl
-    rubber
-    gnumake
-    texlive.combined.scheme-full
-    mpv
-    killall
-    fortune
-    prismlauncher
-    jq
-    discord
-    rustc
-    cargo
-    at
-    rpi-imager
-    sshfs
-    android-tools
-    gimp
-    virtualbox
-    ncspot
-    inetutils
-    cool-retro-term
-    poppler-utils
-    qpdf
-    unzip
-    xprintidle
-    ciscoPacketTracer8
-  ];
+  programs.git = {
+    enable = true;
+    userName = "Oscar Scheepers";
+    userEmail = "oscar@example.com";
+    extraConfig = {
+      init.defaultBranch = "main";
+      pull.rebase = true;
+      url."ssh://git@github.com/".insteadOf = "https://github.com/";
+    };
+  };
+
+  programs.tmux.enable = true;
+
+  # SSH client: keys naar agent, GitHub host entry via bootstrap
+  home.file.".ssh/config".text = ''
+    Host github.com
+      AddKeysToAgent yes
+      IdentityFile ~/.ssh/id_ed25519
+      IdentitiesOnly yes
+  '';
+
+  # Nextcloud/Mimisbrunnr: env-bestand (je vult ’m zelf)
+  home.file.".config/nextcloud-sync.env".text = ''
+    # Vereist:
+    NEXTCLOUD_URL="https://cloud.example.org/remote.php/dav/files/YOURUSER"
+    NEXTCLOUD_USER="YOURUSER"
+    NEXTCLOUD_PASS="YOUR_APP_PASSWORD"  # gebruik een app password
+    LOCAL_DIR="$HOME/Mimisbrunnr"
+  '';
+
+  # Systemd user-service + timer voor sync
+  systemd.user.services."nextcloud-mimi-sync" = {
+    Unit.Description = "Nextcloud sync for Mimisbrunnr";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "%h/.config/home-manager/scripts/nextcloud_mimi_sync.sh";
+      Environment = "PATH=${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.nextcloud-client}/bin";
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+  systemd.user.timers."nextcloud-mimi-sync" = {
+    Unit.Description = "Periodic Nextcloud sync";
+    Timer = {
+      OnBootSec = "1m";
+      OnUnitActiveSec = "15m";
+      Persistent = true;
+    };
+    Install.WantedBy = [ "timers.target" ];
+  };
+
+  # One-shot Doom bootstrap (privé repo vriendelijk)
+  # Draait alleen als ~/.config/doom nog niet bestaat; markeert met stampfile.
+  home.file.".config/home-manager/scripts/doom_bootstrap.sh" = {
+    source = ./scripts/doom_bootstrap.sh;
+    executable = true;
+  };
+  home.file.".config/home-manager/scripts/nextcloud_mimi_sync.sh" = {
+    source = ./scripts/nextcloud_mimi_sync.sh;
+    executable = true;
+  };
+  home.file.".config/doom.private.env".text = ''
+    # Optioneel: fallback token voor HTTPS clone van je private repo
+    # DOOM_GIT_TOKEN="ghp_..."
+    # Of custom URLs:
+    # DOOM_GIT_URL_SSH="git@github.com:Itrekr/doom.git"
+    # DOOM_GIT_URL_HTTPS="https://github.com/Itrekr/doom.git"
+  '';
+
+  systemd.user.services."doom-bootstrap" = {
+    Unit = {
+      Description = "Bootstrap Doom (core + private config)";
+      ConditionPathExists = "!%h/.local/share/doom_bootstrap.done";
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "%h/.config/home-manager/scripts/doom_bootstrap.sh";
+      Environment = "PATH=${pkgs.coreutils}/bin:${pkgs.findutils}/bin:${pkgs.git}/bin:${pkgs.openssh}/bin:${pkgs.curl}/bin";
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
+  home.stateVersion = "24.05";
 }

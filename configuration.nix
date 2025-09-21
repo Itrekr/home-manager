@@ -1,221 +1,57 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    /etc/nixos/hardware-configuration.nix
-    <home-manager/nixos>
-  ];
+  imports = [ <home-manager/nixos> ];
 
-  # System settings
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelParams = [
-    "nvidia-drm.modeset=1"
-  ];
-
-
-  services.udev.packages = [
-   pkgs.android-udev-rules
-  ];
-
-  networking.hostName = "sleipnir";
-  networking.networkmanager.enable = true; # Enable NetworkManager for easy network management
-
-
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [ 4242 2323 3000 ];
-    allowedUDPPorts = [ 4242 2323 3000 ];
-  };
-
-  # Laptop battery setup
-  services.system76-scheduler.settings.cfsProfiles.enable = true;
-  services.tlp = {
-    enable = true;
-    settings = {
-      CPU_BOOST_ON_AC = 1;
-      CPU_BOOST_ON_BAT = 0;
-      CPU_SCALING_GOVERNOR_ON_AC = "performance";
-      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      USB_AUTOSUSPEND = 0;
-    };
-  };
-  services.power-profiles-daemon.enable = false;
-  powerManagement.powertop.enable = false;
-  services.thermald.enable = true;
-
-  # Steam
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-  };
-
-#  # DNS settings
-#  networking.nameservers = [
-#    "9.9.9.9#dns.quad9.net"
-#    "149.112.112.112#dns.quad9.net"
-#  ];
-
-#  services.resolved = {
-#    enable = true;
-#    dnssec = "true";
-#    domains = [ "~." ];
-#    fallbackDns = [
-#      "9.9.9.9#dns.quad9.net"
-#      "149.112.112.112#dns.quad9.net"
-#    ];
-#    dnsovertls = "true";
-#  };
-
-  # VPN settings
-  services.mullvad-vpn.enable = true;
-
-  # Laptop lid settings
-  services.logind = {
-    lidSwitch = "suspend";
-    lidSwitchDocked = "ignore";
-    lidSwitchExternalPower = "ignore";
-    powerKey = "poweroff";
-    suspendKey = "suspend";
-    hibernateKey = "hibernate";
-  };
-
-  # Bluetooth setup
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
-  services.blueman.enable = true;
-
-  # Docker
-  virtualisation = {
-  docker.enable = true;
-  };
-
-  services.ollama = {
-    enable = true;
-    loadModels = [ "mistral-nemo:12b" ];
-    acceleration = "cuda";
-  };
-
-  # VMware
-  virtualisation.vmware.host = {
-    enable = true;
-    package = pkgs.vmware-workstation.overrideAttrs (_final: _prev: {
-      # Your downloaded bundle; Nix will copy it into the store.
-      src = /home/oscar/Mimisbrunnr/Documents/vmware.bundle;
-    });
-  };
-
-  # Pulseaudio setup
-  services.pulseaudio.enable = false;
-  services.pulseaudio.support32Bit = false;
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
-  # ADB
-  programs.adb.enable = true;
-
-  # Flatpak support
-  xdg.portal = {
-  enable = true;
-  configPackages = [ pkgs.xdg-desktop-portal-gtk ];
-  };
-  services.flatpak.enable = true;
-
-  # Timezone and locale settings
+  networking.hostName = "mimisbrunnr";
   time.timeZone = "Europe/Amsterdam";
+
   i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "nl_NL.UTF-8";
-    LC_IDENTIFICATION = "nl_NL.UTF-8";
-    LC_MEASUREMENT = "nl_NL.UTF-8";
-    LC_MONETARY = "nl_NL.UTF-8";
-    LC_NAME = "nl_NL.UTF-8";
-    LC_NUMERIC = "nl_NL.UTF-8";
-    LC_PAPER = "nl_NL.UTF-8";
-    LC_TELEPHONE = "nl_NL.UTF-8";
-    LC_TIME = "nl_NL.UTF-8";
+  i18n.extraLocaleSettings.LC_TIME = "nl_NL.UTF-8";
+
+  # Leesbare TTY
+  console = {
+    keyMap = "us";
+    font = "ter-132n";
+    packages = with pkgs; [ terminus_font ];
   };
 
-  # NVIDIA
-  hardware.graphics.enable = true;
-  hardware.nvidia.open = false;
-  hardware.nvidia.prime = {
-      offload.enable = false;
-      offload.enableOffloadCmd = false;
-      intelBusId = "PCI:0:2:0";
-      nvidiaBusId = "PCI:1:0:0";
-      sync.enable = true;
-  };
+  # Simpel netwerk
+  networking.networkmanager.enable = true;
 
-  hardware.nvidia = {
-    modesetting.enable = true;
-    powerManagement.enable = true;
-  };
-
-  hardware.nvidia-container-toolkit.enable = true;
-
-  # Printers
-  services.printing.enable = true;
-  services.avahi = {
-  enable = true;
-  nssmdns4 = true;
-  openFirewall = true;
-  };
-
-  # Enable the X server and set up i3
-  services.xserver = {
-    enable = true;
-    xkb.layout = "us";
-    xkb.options = "caps:escape,compose:ralt";
-    autoRepeatDelay = 300;
-    autoRepeatInterval = 30;
-    displayManager.lightdm.enable = true;
-    windowManager.i3.enable = true;
-    videoDrivers = [ "nvidia" ];
-  };
-
-  # Define users
+  # User
   users.users.oscar = {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" "audio" "docker" "adbusers" "kvm"];
+    extraGroups = [ "wheel" "networkmanager" ];
+    shell = pkgs.bashInteractive;
+  };
+  security.sudo.enable = true;
+
+  # Geen X/Wayland
+  services.xserver.enable = false;
+
+  # Boot -> autologin tty1 -> tmux -> emacsclient -nw (daemon via HM)
+  services.greetd = {
+    enable = true;
+    settings.default_session = {
+      user = "oscar";
+      command = ''${pkgs.bash}/bin/bash -lc '${pkgs.tmux}/bin/tmux new -A -s main \
+        "${pkgs.emacs29-nox}/bin/emacsclient -nw -a ${pkgs.emacs29-nox}/bin/emacs"'''';
+    };
   };
 
-
-  # System packages
+  # Minimale tools
   environment.systemPackages = with pkgs; [
-  vim
-  git
-  home-manager
-  intel-gpu-tools
-  (pkgs.ollama.override {acceleration = "cuda";})
-  powertop
-];
-
-  home-manager = {
-   useGlobalPkgs = true;
-   useUserPackages = true;
-   users.oscar = import /home/oscar/.config/home-manager/home.nix;
-  };
-
-  # Enable autologin for convenience (if desired)
-  services.displayManager.autoLogin.user = "/oscar";
-  # services.displayManager.autoLogin.enable = false;
-  services.xserver.displayManager.sessionCommands = ''
-    autorandr -c
-  '';
-
-  # Gnome keyring onzin
-  services.gnome.gnome-keyring.enable = true;
-  security.pam.services.gdm.enableGnomeKeyring = true;
-
-  # Use systemd.tmpfiles to create /bin and the /bin/bash symlink
-  systemd.tmpfiles.rules = [
-    "d /bin 0755 root root -"
-    "L /bin/bash - - - - ${pkgs.bash}/bin/bash"
+    git tmux curl wget openssh cadaver
   ];
 
-  # Define system state version
+  # Home Manager: laadt de user-config uit deze repo
+  home-manager = {
+    useUserPackages = true;
+    useGlobalPkgs = true;
+    users.oscar = import /home/oscar/.config/home-manager/home.nix;
+  };
+
+  nixpkgs.config.allowUnfree = true;
   system.stateVersion = "24.05";
 }
