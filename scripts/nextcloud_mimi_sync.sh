@@ -20,5 +20,4 @@ nextcloudcmd --non-interactive \
   --user "$NEXTCLOUD_USER" --password "$NEXTCLOUD_PASS" \
   "$LOCAL_DIR" "$NEXTCLOUD_URL"
 
-# Ensure journal path exists
 mkdir -p "$HOME/Mimisbrunnr/Notes/Journal"
