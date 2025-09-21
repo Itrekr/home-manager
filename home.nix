@@ -130,5 +130,6 @@ in
     qpdf
     unzip
     xprintidle
+    ciscoPacketTracer8
   ];
 }
